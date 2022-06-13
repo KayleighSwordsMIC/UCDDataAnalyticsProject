@@ -14,9 +14,7 @@ Created on Thu May 12 19:46:26 2022
 
 # import required packages, pandas, matplotlib, seaborn, numpy and requests
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
+
 
 """
 
@@ -28,8 +26,9 @@ unique code values
 #import data from github csv to dataframe
 
 gitdata = pd.read_csv(r"https://raw.githubusercontent.com/KayleighSwordsMIC/"\
-                      r"UCDDataAnalyticsProject/main/Data/World-Deaths.csv")
-
+                      r"UCDDataAnalyticsProject/main/Data/World-Deaths.csv")   
+    
+    
 #check for missing values
 #print(data.isna().any())  
 
@@ -39,13 +38,17 @@ gitdata.fillna("N/A", inplace=True)
 #check again to make sure all missing values are gone
 #print(data.isna().any())
 
+
 #drop duplicates for country and year matches
 unique_data = gitdata.drop_duplicates(subset=["Entity", "Year"])
 
-#replace all column names to match those in previous function
-unique_data.columns = ["Entity", "Year", "Code", "Executions", "Meningitis", \
-                       "Neoplasms", "Fire", "Malaria", "Drowning", \
-                    "Interpersonal violence", "HIV/AIDS", "Drugs", \
+#list of columns
+list(unique_data)
+
+#rename columns to make things simpler
+unique_data.columns = ["Entity", "Code", "Year", "Executions", \
+                       "Meningitis", "Neoplasms", "Fire", \
+              "Malaria", "Drowning", "Interpersonal violence", "HIV/AIDS", "Drugs", \
                 "Tuberculosis", "Road injuries", "Maternal disorders", \
                 "Lower respiratory infections", "Neonatal Disorders", \
                 "Alcohol", "Exposure To Forces of nature", \
@@ -57,8 +60,7 @@ unique_data.columns = ["Entity", "Year", "Code", "Executions", "Meningitis", \
                 "Chronic respiratory diseases", "Cirrhosis & other liver disease", \
                 "Digestive diseases", "Acute hepatitis", "Alzheimers & dementia",\
                 "Parkinsons"]
-
-
+    
 #create list of countries as "keys"
 list_of_keys = unique_data["Entity"].to_list()
     
@@ -161,6 +163,8 @@ continue on with rest of program - this text is added to make the program \
 
 """
 
+
+
 #set index
 data_index = unique_data.set_index(["Entity", "Year"])
 
@@ -170,64 +174,105 @@ data_srt = data_index.sort_index()
 
 #slice data for Ireland
 ireland = data_srt.loc["Ireland":"Ireland"]
-
-#create a function - type of death to return the year and its max value
     
 def max_deaths():
-    #specify the dataframe this is working on 
+        
+   #specify the dataframe this is working on 
     df = ireland
     
     #replace missing N/A values with 0
     df = df.replace("N/A", 0)
     
+    #thank you statement
+    thank_you = "Okay, thanks have a nice day!"
     
-    print("Hello! I hear you are interested in data on the causes of deaths in "\
-          "Ireland. \n"
-        "Please select the category of death you are interested in from the "
-            "following list: \n")
-    print(", \n".join([str(death) for death in df.columns[1:]]))
+    #opening statement    
+    statement = "Hello! I hear you are interested in data on the causes of "\
+        "deaths in Ireland. \n"
+    
+    #selection statement
+    selection = "Please select the category of death you are interested in from "\
+        "the following list: \n"
+        
+    #list of options
+    list_to_print = (", \n".join([str(death) for death in df.columns[1:]]))
         
     #check if death is in columns
-    death = input("Please type in the death you are interested in data on. \n"
-                  "Please make sure it matches the list above exactly: \n ").lower()
+    entry = "Please type in the death you are interested in data on. \n"\
+                  "Please make sure it matches the list above exactly: \n "
     
     #change columns to all lower case for comparison
     df.columns = df.columns.str.lower()
     
+    #list of possible yes answers
+    yes = ["yes", "y", "ya", "yeah", "okay", "ok"]
     
-    if death in df.columns:
-        #get max no of deaths
-        max_value = df[death].max()
-        
-        
-        #get year - index returns as tuple, convert to list containing just year
-        max_year_tuple = df[death].idxmax()
-        max_year_list = list(max_year_tuple)
-        max_year = max_year_list.pop(1)
-        
-        
-        print("\n You selected " + str(death).upper() + ". \n The highest number of "\
-              "deaths which have been recorded in Ireland for this category is " + \
-                  str(int(max_value)) + ".\n This occured in " + str(max_year) + ".")
-        
-    elif death not in df.columns:
-        whoops = input("I don't think you typed that in correctly. \n" \
-              "Would you like to try again? \n" \
-                  "Please type 'Yes' or 'No' \n").lower()
-        if whoops == "yes":
-            max_deaths()
-        elif whoops == "no":
-            print("Okay, thanks, have a nice day!")
+    #list of possible no answers
+    no = ["no", "n", "no thanks", "no thank you", "no way", "quit"]
+    
+    #question for user to respond to
+    try_again_q = "Would you like to try that again? "
+    
+    
+    
+    #function to try again
+    def try_again():
+        try_again_a = input(try_again_q).lower()
+        if try_again_a in yes:
+            call_deaths()            
+        elif try_again_a in no:
+            print(thank_you)
         else:
-            whoops_2 = input("Please type in 'Yes' or 'No' \n").lower()
-            if whoops_2 == "yes":
-                max_deaths()
-            else:
-                print("Okay, thanks, have a nice day!")
+            print("Please type in 'Yes' or 'No'. ")
+            try_again()
+   
+   #function to play again
+    def play_again():
+        q = input("Would you like to try another category? ").lower()
+        if q in yes:
+            call_deaths()
+        elif q in no:
+            print(thank_you)
+        else:
+            print("Please type in 'Yes' or 'No'. ")
+            try_again()
+   
+       
+    print(statement)
     
-    else:
-        print("Have a nice day!")
-             
+    def call_deaths():
+    
+        while True:
+            print(selection)
+            print(list_to_print)
+            death = input(entry).lower()
+            if death in df.columns:
+                #get max no of deaths
+                max_value = df[death].max()
+                
+                
+                #get year - index returns as tuple, convert to list containing just year
+                max_year_tuple = df[death].idxmax()
+                max_year_list = list(max_year_tuple)
+                max_year = max_year_list.pop(1)
+                
+                
+                print("\n You selected " + str(death).upper() + ". \n The highest number of "\
+                      "deaths which have been recorded in Ireland for this category is " + \
+                          str(int(max_value)) + ".\n This occured in " + str(max_year) + ".")
+                play_again()
+                break
+                
+            elif death not in df.columns:
+                print("I don't think you typed that in correctly. \n")
+                try_again()
+                break
+            
+            else:
+                print(thank_you)
+                break
+        
+    call_deaths()
     
     
 max_deaths()
